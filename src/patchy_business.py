@@ -66,13 +66,12 @@ def swap_random_patches(img, patch_fraction=0.1, n_swaps=10, seed=None):
 
 
 import random
-from PIL import ImageDraw
 
 
 def swap_random_circles(img, patch_fraction=0.1, n_swaps=10, seed=None):
     """
-        Swap random non-overlapping circular patches in an image.
-        """
+    Swap random non-overlapping circular patches in an image.
+    """
 
     if seed is not None:
         random.seed(seed)
