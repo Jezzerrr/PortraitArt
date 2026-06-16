@@ -1,11 +1,4 @@
-import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
-from scipy.stats import linregress
-from datetime import datetime
-import random
 import os
-import seaborn as sns
 
 from PIL import Image
 
