@@ -3,28 +3,7 @@ from PIL import Image, ImageDraw
 
 
 def rotate_random_circle(img, patch_fraction=0.1, angle=90, center_fraction=None, seed=None):
-    """
-    Rotate a random circular region in-place.
-
-    Parameters
-    ----------
-    img : PIL.Image.Image
-        Input image (must be square).
-    patch_fraction : float
-        Size of circle diameter as fraction of image size.
-    angle : float
-        Rotation angle in degrees.
-    center_fraction : tuple or None
-        Optional (x_fraction, y_fraction) for the circle centre.
-        Example: (0.5, 0.5) is the middle.
-        If None, a random circle is used.
-    seed : int or None
-        Optional random seed.
-
-    Returns
-    -------
-    PIL.Image.Image
-    """
+    """Rotate a random circular region in-place."""
 
     if seed is not None:
         random.seed(seed)

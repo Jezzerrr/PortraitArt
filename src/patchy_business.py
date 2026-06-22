@@ -4,25 +4,7 @@ from PIL import Image, ImageDraw
 
 
 def swap_random_patches(img, patch_fraction=0.1, n_swaps=10, seed=None):
-    """
-    Swap random non-overlapping square patches in an image.
-
-    Parameters
-    ----------
-    img : PIL.Image.Image
-        Input image (must be square).
-    patch_fraction : float
-        Size of patch as fraction of image width (e.g. 0.1 = 10%).
-    n_swaps : int
-        Number of swaps to perform.
-    seed : int or None
-        Optional random seed for reproducibility.
-
-    Returns
-    -------
-    PIL.Image.Image
-        Modified image.
-    """
+    """Swap random non-overlapping square patches in an image."""
 
     if seed is not None:
         random.seed(seed)
@@ -69,9 +51,7 @@ import random
 
 
 def swap_random_circles(img, patch_fraction=0.1, n_swaps=10, seed=None):
-    """
-    Swap random non-overlapping circular patches in an image.
-    """
+    """Swap random non-overlapping circular patches in an image."""
 
     if seed is not None:
         random.seed(seed)
