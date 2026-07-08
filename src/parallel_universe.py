@@ -2,88 +2,71 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 
-def image_to_grid_stripes(img, grid_size=10, angle=45, min_length=0, max_length=None, jitter=None, color=False):
-    """Convert image into stripes."""
-    if max_length is None:
-        max_length = grid_size
-
+def image_to_parallel_lines(img, angle=45, line_spacing=8, darkness_threshold=0.35, sample_step=2, min_segment_length=8, line_width=1):
+    """Convert image to evenly spaced parallel line segments. Dark parts of the image determine where lines are visible."""
     img_gray = img.convert("L")
-
     width, height = img_gray.size
-
-    n_cols = round(width / grid_size)
-    n_rows = round(height / grid_size)
-
-    x_edges = np.linspace(0, width, n_cols + 1, dtype=int)
-    y_edges = np.linspace(0, height, n_rows + 1, dtype=int)
+    img_array = np.array(img_gray)
 
     output = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(output)
 
-    img_array = np.array(img_gray)
-
     angle_rad = np.deg2rad(angle)
 
-    dx_unit = np.cos(angle_rad)
-    dy_unit = np.sin(angle_rad)
+    # Direction of the parallel lines
+    dx = np.cos(angle_rad)
+    dy = np.sin(angle_rad)
 
-    for i in range(n_rows):
-        for j in range(n_cols):
+    # Perpendicular direction; used to place neighbouring lines
+    nx = -np.sin(angle_rad)
+    ny = np.cos(angle_rad)
 
-            x0, x1 = x_edges[j], x_edges[j + 1]
-            y0, y1 = y_edges[i], y_edges[i + 1]
+    diagonal = int(np.ceil(np.sqrt(width**2 + height**2)))
+    cx = width / 2
+    cy = height / 2
 
-            if x1 <= x0 or y1 <= y0:
-                continue
+    offsets = np.arange(-diagonal, diagonal + line_spacing, line_spacing)
 
-            cx = (x0 + x1) // 2
-            cy = (y0 + y1) // 2
+    for offset in offsets:
+        base_x = cx + offset * nx
+        base_y = cy + offset * ny
 
-            cell_size = min(x1 - x0, y1 - y0)
-            cx, cy = apply_circular_jitter(cx, cy, cell_size, jitter)
+        current_segment = []
 
-            sx = max(0, min(width - 1, cx))
-            sy = max(0, min(height - 1, cy))
+        for t in np.arange(-diagonal, diagonal + sample_step, sample_step):
+            x = base_x + t * dx
+            y = base_y + t * dy
 
-            brightness = img_array[sy, sx]
+            ix = int(round(x))
+            iy = int(round(y))
 
-            length = max_length * (1 - brightness / 255)
+            inside_image = 0 <= ix < width and 0 <= iy < height
 
-            if length < min_length:
-                continue
-
-            dx = dx_unit * length / 2
-            dy = dy_unit * length / 2
-
-            if color:
-                line_color = img.getpixel((sx, sy))
+            if inside_image:
+                darkness = 1 - img_array[iy, ix] / 255
+                visible = darkness >= darkness_threshold
             else:
-                line_color = "black"
+                visible = False
 
-            draw.line(
-                (
-                    cx - dx,
-                    cy - dy,
-                    cx + dx,
-                    cy + dy,
-                ),
-                fill=line_color,
-                width=1
-            )
+            if visible:
+                current_segment.append((x, y))
+            else:
+                draw_segment_if_long_enough(draw, current_segment, min_segment_length, line_width)
+                current_segment = []
+
+        draw_segment_if_long_enough(draw, current_segment, min_segment_length, line_width)
 
     return output
 
 
-def apply_circular_jitter(cx, cy, cell_size, jitter):
-    if not jitter:
-        return cx, cy
+def draw_segment_if_long_enough(draw, segment, min_segment_length, line_width):
+    if len(segment) < 2:
+        return
 
-    max_r = cell_size * jitter
+    x1, y1 = segment[0]
+    x2, y2 = segment[-1]
 
-    angle = np.random.uniform(0, 2 * np.pi)
-    r = max_r * np.sqrt(np.random.uniform(0, 1))
+    length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
-    cx += int(r * np.cos(angle))
-    cy += int(r * np.sin(angle))
-
-    return cx, cy
+    if length >= min_segment_length:
+        draw.line((x1, y1, x2, y2), fill="black", width=line_width)
