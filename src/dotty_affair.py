@@ -1,3 +1,4 @@
+from matplotlib import colormaps
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -111,10 +112,24 @@ def image_to_density_dots(img, grid_size=10, dot_radius=3, jitter=None, fill=Fal
                 cy + dot_radius,
             )
 
+            palette = [
+                (231, 76, 60),  # red
+                # (241, 196, 15),  # yellow
+                # (46, 204, 113),  # green
+                (52, 152, 219),  # blue
+                (155, 89, 182),  # purple
+            ]
+            random_color = tuple(np.random.randint(50, 206, 3))
+            # random_color = palette[np.random.randint(len(palette))]
+
+            # cmap = colormaps["viridis"]
+            # rgba = cmap(np.random.random())
+            # random_color = tuple(int(255 * c) for c in rgba[:3])
+
             if fill:
-                draw.ellipse(bbox, fill="black")
+                draw.ellipse(bbox, fill=random_color)
             else:
-                draw.ellipse(bbox, outline="black", width=1)
+                draw.ellipse(bbox, outline=random_color, width=1)
 
     return output
 
