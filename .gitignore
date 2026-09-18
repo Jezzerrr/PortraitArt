@@ -19,6 +19,10 @@ tmp/
 # Secrets
 .env
 
+input/**
+!input/**/
+!input/**/.gitkeep
+
 output/**
 !output/**/
 !output/**/.gitkeep
